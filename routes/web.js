@@ -90,6 +90,7 @@ router.get("/getWebData/:uname", async (req, res) => {
                     phone: web.phone,
                     email: web.email,
                     address: web.address,
+                    gstn:web.gstn
                 };
                 break;
             
