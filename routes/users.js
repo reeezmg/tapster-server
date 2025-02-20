@@ -32,6 +32,10 @@ router.post('/register', async (req, res) => {
 
     res.cookie('token', token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,  // 1 week in milliseconds
+      httpOnly: false,                   // Protect against XSS
+      secure: true,                     // Ensure cookie is sent over HTTPS only
+      sameSite: 'None',                 // Allow cross-site cookies
+      domain: '.tapster.shop',  
     });
     
 
@@ -61,7 +65,11 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id}, JWT_SECRET, {
-      expiresIn: '7d', // Token expires in 1 week
+      maxAge: 7 * 24 * 60 * 60 * 1000,  // 1 week in milliseconds
+      httpOnly: false,                   // Protect against XSS
+      secure: true,                     // Ensure cookie is sent over HTTPS only
+      sameSite: 'None',                 // Allow cross-site cookies
+      domain: '.tapster.shop',  
     });
 
     // Set token as HTTP-only cookie for 1 week
