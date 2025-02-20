@@ -18,6 +18,9 @@ const webSchema = new mongoose.Schema({
   phone: {
     type: String,
   },
+  gstn: {
+    type: String,
+  },
   address: {
     type: String,
   },
