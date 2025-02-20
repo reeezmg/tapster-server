@@ -13,9 +13,11 @@ const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/clien
 
 
 const app = express();
-const PORT = process.env.PORT || 8000;
-dotenv.config({ path: './config.env' });
 app.use(cookieParser());
+
+const PORT = process.env.PORT || 8000;
+
+
 // Middleware
 app.use(
   cors({
