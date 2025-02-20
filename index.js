@@ -9,78 +9,66 @@ const webRoutes = require('./routes/web');
 const otpRoutes = require('./routes/otp');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
-const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const serverless = require("serverless-http");
 
+dotenv.config({ path: './config.env' });
 
 const app = express();
-const PORT = process.env.PORT || 8000;
-dotenv.config({ path: './config.env' });
 app.use(cookieParser());
+
 // Middleware
 app.use(
   cors({
     origin: [
       'http://localhost:3000',
       'https://reez-one.vercel.app',
-      'https://reez.uk/'
-    ],    
+      'https://reez.uk/',
+    ],
     credentials: true,
   })
 );
 app.use(express.json());
 
-const bucketname = process.env.BUCKET_NAME
-const bucketRegion = process.env.BUCKET_REGION
-const accessKey = process.env.ACCESS_KEY
-const secretAccessKey = process.env.SECRET_ACCESS_KEY
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('MongoDB Connected'))
+  .catch((err) => console.error('MongoDB Connection Error:', err));
 
-
+// AWS S3 Configuration
 const s3 = new S3Client({
-  credentials:{
-    accessKeyId: accessKey,
-    secretAccessKey:secretAccessKey,
+  credentials: {
+    accessKeyId: process.env.ACCESS_KEY,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
   },
-  region: bucketRegion
-})
+  region: process.env.BUCKET_REGION,
+});
 
-
-
-
-  mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => console.log('Connected!'))
-  .catch((err) => console.error('Error connecting to MongoDB:', err));
-
-
-  //image upload
+// Image Upload
 const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-const upload = multer({ storage: storage });
+app.post('/api/images/', upload.single('image'), async (req, res) => {
+  try {
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: req.body.name,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    };
 
- app.post('/api/images/', upload.single('image'), async(req, res) => {
-  
-  // const buffer = await sharp(req.file.buffer).resize({height:1920,width:1080, fit:"contain"}).toBuffer()
-try{
-  const params = {
-    Bucket: bucketname,
-    Key: req.body.name,
-    Body: req.file.buffer,
-    ContentType: req.file.mimetype
+    const command = new PutObjectCommand(params);
+    await s3.send(command);
+    res.send({ message: 'Image uploaded successfully', filename: req.body.name });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Image upload failed' });
   }
-
-  const command = new PutObjectCommand(params)
-  
-  await s3.send(command)
-
-  res.send(req.body.name)
-}
-catch(error){
-  console.log(error)
-}
-})
-  
-   
-
+});
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -89,6 +77,4 @@ app.use('/api/web', webRoutes);
 app.use('/api/set', setRoutes);
 app.use('/api/otp', otpRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});    
+module.exports = serverless(app);
