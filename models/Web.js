@@ -12,6 +12,9 @@ const webSchema = new mongoose.Schema({
   name: {
     type: String,
   },
+  company:{
+    type:String
+  },
   email: {
     type: String,
   },
