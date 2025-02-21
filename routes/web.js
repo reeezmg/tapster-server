@@ -22,11 +22,45 @@ router.post('/',authenticateToken, async (req, res) => {
                 { ...req.body.formData, user: req.user.id,webType:req.body.webType }, 
                 { new: true } // return updated document
             );
-            set.step = 3;
+            set.step = 4;
             await set.save();
         } else {
             // If set.card doesn't exist, create a new card
             web = new Web({ ...req.body.formData, user: req.user.id, webType:req.body.webType });
+            await web.save();
+
+            // Update set with the new card ID
+            set.web = web._id;
+            set.step = 4;
+            await set.save();
+        }
+        
+        res.status(201).json(web);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.post('/contact',authenticateToken, async (req, res) => {
+    try {
+         const set = await Set.findById(req.body.id);
+        if (!set) {
+            return res.status(404).json({ error: "Set not found" });
+        }
+        let web;
+
+        if (set.web) {
+            // If set.card exists, update the existing card
+            web = await Web.findByIdAndUpdate(
+                set.web, // existing card ID
+                { ...req.body.formData, user: req.user.id }, 
+                { new: true } // return updated document
+            );
+            set.step = 3;
+            await set.save();
+        } else {
+            // If set.card doesn't exist, create a new card
+            web = new Web({ ...req.body.formData, user: req.user.id });
             await web.save();
 
             // Update set with the new card ID
@@ -83,7 +117,7 @@ router.get("/getWebData/:uname", async (req, res) => {
         let responseData = {};
         
         switch (webType) {
-            case "contact":
+            case "":
                 responseData = {
                     name: web.name,
                     company: web.company,
