@@ -124,7 +124,101 @@ router.get("/getWebData/:uname", async (req, res) => {
                     phone: web.phone,
                     email: web.email,
                     address: web.address,
-                    gstn:web.gstn
+                    gstn:web.gstn,
+                    uname:set.uname
+                };
+                break;
+            
+            case "link":
+                responseData = {
+                    name: web.name,
+                    phone: web.phone,
+                    email: web.email,
+                    address: web.address,
+                    bio: web.bio,
+                    profilePicture: web.profilePicture,
+                    backgroundImage: web.backgroundImage,
+                    links: web.links,
+                };
+                break;
+            
+            case "shop":
+                responseData = {
+                    logo: web.logo,
+                    name: web.name,
+                    phone: web.phone,
+                    email: web.email,
+                    otherPictures: web.otherPictures,
+                    productCategories: web.productCategories,
+                    businessHours: web.businessHours,
+                    inquiryPreference: web.inquiryPreference,
+                };
+                break;
+            
+            case "student":
+                responseData = {
+                    name: web.name,
+                    profession: web.profession,
+                    description: web.description,
+                    email: web.email,
+                    phone: web.phone,
+                    profilePicture: web.profilePicture,
+                    coverPicture: web.coverPicture,
+                    academics: web.academics,
+                    address: web.address,
+                    skills: web.skills,
+                    hobbies: web.hobbies,
+                    links: web.links,
+                    certifications: web.certifications,
+                    languages: web.languages,
+                    organizations: web.organizations,
+                    achievements: web.achievements,
+                    works: web.works,
+                    experiences: web.experiences,
+                };
+                break;
+            
+            case "externalLink":
+                responseData = { externalLink: web.externalLink };
+                break;
+            
+            default:
+                return res.status(400).json({ message: "Invalid webType" });
+        }
+        
+        return res.status(200).json({responseData,webType});
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
+router.get("/getWebDataById/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Find the set with the given uname
+        const set = await Set.findById(id).populate("web");
+        if (!set || !set.web) {
+            return res.status(404).json({ message: "Web data not found" });
+        }
+        
+        const web = set.web;
+        const { webType } = web;
+        
+        let responseData = {};
+        
+        switch (webType) {
+            case "":
+                responseData = {
+                    name: web.name,
+                    company: web.company,
+                    phone: web.phone,
+                    email: web.email,
+                    address: web.address,
+                    gstn:web.gstn,
+                    uname:set.uname
                 };
                 break;
             
