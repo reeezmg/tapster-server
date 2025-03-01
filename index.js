@@ -7,11 +7,12 @@ const cardRoutes = require('./routes/card');
 const setRoutes = require('./routes/set');
 const webRoutes = require('./routes/web');
 const otpRoutes = require('./routes/otp');
+const createSetRoutes = require('./routes/createSet');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 
-
+dotenv.config({ path: './config.env' });
 const app = express();
 app.use(cookieParser());
 
@@ -89,6 +90,7 @@ app.use('/api/card', cardRoutes);
 app.use('/api/web', webRoutes);
 app.use('/api/set', setRoutes);
 app.use('/api/otp', otpRoutes);
+app.use('/api/createSet', createSetRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

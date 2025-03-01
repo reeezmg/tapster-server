@@ -53,14 +53,14 @@ router.post('/contact',authenticateToken, async (req, res) => {
             // If set.card exists, update the existing card
             web = await Web.findByIdAndUpdate(
                 set.web, // existing card ID
-                { ...req.body.formData, user: req.user.id }, 
+                { ...req.body.contact, user: req.user.id }, 
                 { new: true } // return updated document
             );
             set.step = 3;
             await set.save();
         } else {
             // If set.card doesn't exist, create a new card
-            web = new Web({ ...req.body.formData, user: req.user.id });
+            web = new Web({ ...req.body.contact, user: req.user.id });
             await web.save();
 
             // Update set with the new card ID
@@ -68,6 +68,7 @@ router.post('/contact',authenticateToken, async (req, res) => {
             set.step = 3;
             await set.save();
         }
+        console.log(web)
         
         res.status(201).json(web);
     } catch (error) {
@@ -280,6 +281,74 @@ router.get("/getWebDataById/:id", async (req, res) => {
         }
         
         return res.status(200).json({responseData,webType});
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+router.post('/forLink',authenticateToken, async (req, res) => {
+    try {
+         const set = await Set.findById(req.body.id);
+        console.log(req.body.formData)
+        if (!set) {
+            return res.status(404).json({ error: "Set not found" });
+        }
+        let web;
+
+        if (set.web) {
+            // If set.card exists, update the existing card
+            web = await Web.findByIdAndUpdate(
+                set.web, // existing card ID
+                { ...req.body.formData, user: req.user.id,webType:'link' }, 
+                { new: true } // return updated document
+            );
+            set.step = 5;
+            await set.save();
+        } else {
+            // If set.card doesn't exist, create a new card
+            web = new Web({ ...req.body.formData, user: req.user.id, webType:'link' });
+            await web.save();
+
+            // Update set with the new card ID
+            set.web = web._id;
+            set.step = 5;
+            await set.save();
+        }
+        
+        res.status(201).json(web);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.get("/getWebDataByIdForLink/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Find the set with the given uname
+        const set = await Set.findById(id).populate("web");
+        if (!set || !set.web) {
+            return res.status(404).json({ message: "Web data not found" });
+        }
+        
+        const web = set.web;
+        
+        let responseData = {};
+        
+       
+                responseData = {
+                    name: web.name,
+                    phone: web.phone,
+                    email: web.email,
+                    address: web.address,
+                    bio: web.bio,
+                    profilePicture: web.profilePicture,
+                    backgroundImage: web.backgroundImage,
+                    links: web.links,
+                }
+        
+        return res.status(200).json({responseData});
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal server error" });

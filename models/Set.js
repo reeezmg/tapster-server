@@ -4,15 +4,13 @@ const setSchema = new mongoose.Schema({
     user: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User', 
-        required: true 
     },
     uname:{
         type:String,
-        unique:true
     },
     address:{
         houseNo:{
-            type:String
+            type:String  
         },
         street:{
             type:String
@@ -37,7 +35,11 @@ const setSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    step: { type: Number, enum: [1,2,3,4] },
+    readyMade:{
+        type:Boolean,
+        default:false
+    },
+    step: { type: Number, enum: [1,2,3,4,5] },
     card: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Card', 
