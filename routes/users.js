@@ -111,6 +111,11 @@ router.post('/login', async (req, res) => {
     // Set token as HTTP-only cookie for 1 week
     res.cookie('token', token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,  // 1 week in milliseconds
+      maxAge: 7 * 24 * 60 * 60 * 1000,  // 1 week in milliseconds
+      httpOnly: false,                   // Protect against XSS
+      secure: true,                     // Ensure cookie is sent over HTTPS only
+      sameSite: 'None',                 // Allow cross-site cookies
+      domain: '.tapster.shop', 
     
     });
     
