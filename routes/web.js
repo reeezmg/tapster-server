@@ -140,6 +140,9 @@ router.get("/getWebData/:uname", async (req, res) => {
                     profilePicture: web.profilePicture,
                     backgroundImage: web.backgroundImage,
                     links: web.links,
+                    name: web.name,
+                    company: web.company,
+                    gstn:web.gstn,
                 };
                 break;
             
